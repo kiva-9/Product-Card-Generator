@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>产品卡片生成器</title>
+    <style>
+        /* --- 1. 工具本身的样式 --- */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 24px;
+            background-color: #f8fafc;
+            color: #334155;
+        }
+        h1 {
+            text-align: center;
+            color: #0f172a;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 16px;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 30px;
+            max-width: 1400px;
+            margin: 20px auto;
+        }
+        .form-section {
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            height: fit-content;
+        }
+        .form-section h2 {
+            margin-top: 0;
+            color: #1e293b;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 15px;
+        }
+        .form-group input[type="text"],
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            box-sizing: border-box; /* 保证 padding 不会撑开宽度 */
+            font-size: 16px;
+        }
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        .action-btn {
+            all: unset;
+            box-sizing: border-box;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 14px 22px;
+            border-radius: 12px;
+            background: #97000F;
+            color: #ffffff !important;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s ease;
+        }
+        .action-btn:hover {
+            background: #E30016;
+        }
+        
+        .output-section h2 {
+            margin-top: 0;
+        }
+        #previewWrapper {
+            margin-bottom: 24px;
+            /* 给预览区加一个背景，以便看清卡片阴影 */
+            background: #f1f5f9;
+            padding: 32px;
+            border-radius: 12px;
+            overflow-x: auto; /* 如果卡片太宽，可以滚动 */
+        }
+        #outputCode {
+            width: 100%;
+            height: 400px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 12px;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 14px;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+        #copyBtn {
+            margin-top: 12px;
+            background: #059669;
+        }
+        #copyBtn:hover {
+            background: #065f46;
+        }
+        
+        /* 响应式布局 */
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* --- 2. 你提供的产品卡片样式 (用于预览) --- */
+        .gpcard {
+            --bg: #ffffff;
+            --text: #0f172a;
+            --muted: #475569;
+            --btn: #97000F;
+            --btn-text: #ffffff;
+            --radius: 20px;
+            --shadow: 0 10px 30px rgba(0,0,0,.08);
+            background: var(--bg);
+            color: var(--text);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            max-width: 1000px;
+            margin: 0 auto; /* 在预览区居中 */
+            display: grid;
+            grid-template-columns: 1fr 1.1fr;
+            align-items: stretch;
+        }
+        .gpcard__media { background: #f1f5f9; }
+        .gpcard__img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            aspect-ratio: 16/9;
+        }
+        .gpcard__body {
+            padding: 28px 32px;
+            display: grid;
+            gap: 14px;
+        }
+        .gpcard__title {
+            font-size: clamp(22px,2.6vw,30px);
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .gpcard__desc {
+            color: var(--muted);
+            font-size: clamp(15px,1.8vw,18px);
+            line-height: 1.6;
+            /* 关键：让预览区尊重 textarea 里的换行 */
+            white-space: pre-wrap; 
+        }
+        .gpcard__btnwrap { margin-top: 8px; }
+        .gpcard__btn {
+            all: unset;
+            box-sizing: border-box;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 22px;
+            border-radius: 12px;
+            background: var(--btn);
+            color: #ffffff !important;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none !important;
+            box-shadow: 0 6px 16px rgba(29,78,216,.25);
+            transition: transform .06s ease;
+        }
+        .gpcard__btn:hover { transform: translateY(-1px); }
+        .gpcard__btn:active { transform: translateY(0); }
+        
+        @media (max-width: 780px) {
+            .gpcard { grid-template-columns: 1fr; }
+            .gpcard__body { padding: 20px 18px 22px; }
+            .gpcard__img { aspect-ratio: 16/10; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>产品卡片生成器</h1>
+
+    <div class="container">
+        <div class="form-section">
+            <h2>填写内容</h2>
+            
+            <div class="form-group">
+                <label for="title">Title (标题)</label>
+                <input type="text" id="title" value="SANVO Brake Cleaner">
+            </div>
+
+            <div class="form-group">
+                <label for="description">描述</label>
+                <textarea id="description">SANVO Brake Cleaner can penetrate, dissolve and remove dust, oil and impurities on the brake system, clutch and brake calipers.</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="imageUrl">图片 URL</label>
+                <input type="text" id="imageUrl" value="https://www.sanvochemicals.com/wp-content/uploads/2021/06/SANVO-Brake-Cleaner-1.jpg">
+            </div>
+
+            <div class="form-group">
+                <label for="productUrl">产品页 URL (按钮链接)</label>
+                <input type="text" id="productUrl" value="https://www.sanvochemicals.com/product-item/sanvo-brake-cleaner/">
+            </div>
+
+            <button id="generateBtn" class="action-btn">更新预览和代码</button>
+        </div>
+
+        <div class="output-section">
+            <h2>实时预览</h2>
+            <div id="previewWrapper">
+                <div id="previewArea">
+                    </div>
+            </div>
+
+            <h2>复制代码</h2>
+            <p>将下面框内的所有代码（包含 &lt;style&gt;）粘贴到古腾堡的 "自定义HTML" 区块中。</p>
+            <textarea id="outputCode" readonly></textarea>
+            <button id="copyBtn" class="action-btn">复制到剪贴板</button>
+        </div>
+    </div>
+
+    <script>
+        // --- 3. JavaScript 逻辑 ---
+
+        // 定义模板
+        // A. CSS 模板
+        const cssTemplate = `
+<style>
+  .gpcard {
+    --bg: #ffffff;
+    --text: #0f172a;
+    --muted: #475569;
+    --btn: #97000F;
+    --btn-text: #ffffff;
+    --radius: 20px;
+    --shadow: 0 10px 30px rgba(0,0,0,.08);
+
+    background: var(--bg);
+    color: var(--text);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    max-width: 1000px;
+    margin: 1.5rem auto;
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    align-items: stretch;
+  }
+
+  .gpcard__media { background: #f1f5f9; }
+  .gpcard__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    aspect-ratio: 16/9;
+  }
+
+  .gpcard__body {
+    padding: 28px 32px;
+    display: grid;
+    gap: 14px;
+  }
+
+  .gpcard__title {
+    font-size: clamp(22px,2.6vw,30px);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .gpcard__desc {
+    color: var(--muted);
+    font-size: clamp(15px,1.8vw,18px);
+    line-height: 1.6;
+    white-space: pre-wrap; 
+  }
+
+  .gpcard__btnwrap { margin-top: 8px; }
+  .gpcard__btn {
+    all: unset;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 22px;
+    border-radius: 12px;
+    background: var(--btn);
+    color: #ffffff !important;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none !important;
+    box-shadow: 0 6px 16px rgba(29,78,216,.25);
+    transition: transform .06s ease;
+  }
+  .gpcard__btn:hover { 
+    transform: translateY(-1px);
+    background: #E30016
+}
+  .gpcard__btn:active { transform: translateY(0); }
+
+  @media (max-width: 780px) {
+    .gpcard { grid-template-columns: 1fr; }
+    .gpcard__body { padding: 20px 18px 22px; }
+    .gpcard__img { aspect-ratio: 16/10; }
+  }
+</style>
+        `.trim(); // .trim() 移除首尾空白
+
+        // B. HTML 模板 (使用占位符)
+        const htmlTemplate = `
+<div class="gpcard" role="region" aria-label="Product card">
+  <div class="gpcard__media">
+    <img class="gpcard__img"
+         src="{{IMAGE_URL}}"
+         alt="{{ALT_TEXT}}">
+  </div>
+  <div class="gpcard__body">
+    <div class="gpcard__title">{{TITLE}}</div>
+    <div class="gpcard__desc">
+{{DESCRIPTION}}
+    </div>
+    <div class="gpcard__btnwrap">
+      <a class="gpcard__btn"
+         href="{{PRODUCT_URL}}">
+        View Details
+      </a>
+    </div>
+  </div>
+</div>
+        `.trim();
+        
+        // 获取所有需要操作的 DOM 元素
+        const titleInput = document.getElementById('title');
+        const descriptionInput = document.getElementById('description');
+        const imageUrlInput = document.getElementById('imageUrl');
+        const productUrlInput = document.getElementById('productUrl');
+        
+        const generateBtn = document.getElementById('generateBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        
+        const previewArea = document.getElementById('previewArea');
+        const outputCode = document.getElementById('outputCode');
+
+        // 核心功能：生成和更新内容的函数
+        function generateCard() {
+            // 1. 从表单获取值
+            const title = titleInput.value || "默认标题"; // 提供默认值
+            const description = descriptionInput.value || "这里是产品描述。";
+            const imageUrl = imageUrlInput.value || "https://via.placeholder.com/600x400"; // 默认占位图
+            const productUrl = productUrlInput.value || "#";
+            // 自动生成 alt 文本，提高可访问性
+            const altText = `Product image of ${title}`; 
+            
+            // 2. 生成替换后的 HTML
+            let finalHtml = htmlTemplate
+                .replace('{{IMAGE_URL}}', imageUrl)
+                .replace('{{ALT_TEXT}}', altText)
+                .replace('{{TITLE}}', title)
+                .replace('{{DESCRIPTION}}', description)
+                .replace('{{PRODUCT_URL}}', productUrl);
+
+            // 3. 更新【预览区】
+            // 预览区只需要 HTML，因为 CSS 已经在页面的 <head> 中加载了
+            previewArea.innerHTML = finalHtml;
+            
+            // 4. 更新【代码输出框】
+            // 输出框需要完整的 <style> 和 HTML
+            outputCode.value = cssTemplate + '\n\n' + finalHtml;
+        }
+
+        // 复制到剪贴板的功能
+        function copyToClipboard() {
+            outputCode.select(); // 选中 textarea_
+            document.execCommand('copy'); // (旧版但兼容性好)
+            // 现代 API: navigator.clipboard.writeText(outputCode.value);
+
+            // 提供反馈
+            copyBtn.textContent = '已复制!';
+            setTimeout(() => {
+                copyBtn.textContent = '复制到剪贴板';
+            }, 2000);
+        }
+
+        // --- 4. 绑定事件 ---
+        
+        // 按钮点击事件
+        generateBtn.addEventListener('click', generateCard);
+        copyBtn.addEventListener('click', copyToClipboard);
+        
+        // 也可以让表单输入时自动更新 (实时刷新)
+        [titleInput, descriptionInput, imageUrlInput, productUrlInput].forEach(input => {
+            input.addEventListener('input', generateCard);
+        });
+
+        // 页面加载时立即生成一次，显示默认效果
+        document.addEventListener('DOMContentLoaded', generateCard);
+        
+    </script>
+</body>
+</html>
