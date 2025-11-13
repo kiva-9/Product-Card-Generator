@@ -154,14 +154,105 @@
             border-radius: 999px;
             font-weight: 600;
             font-size: 0.95rem;
-            color: var(--btn-text);
+            color: var(--btn-text, #ffffff);
             text-decoration: none;
-            background: #97000f;
+            background: var(--btn, #97000f);
             transition: background 0.2s ease, transform 0.2s ease;
         }
         .pcard__button:hover {
-            background: #e30016;
+            background: var(--btn-hover, #e30016);
             transform: translateY(-1px);
+        }
+        .pcard--comparison {
+            grid-template-columns: 1fr;
+            padding: 28px 30px;
+            background: linear-gradient(140deg, rgba(15, 23, 42, 0.03), rgba(15, 23, 42, 0.08));
+            gap: 24px;
+        }
+        .pcard--comparison .pcard__content {
+            padding: 0;
+            gap: 20px;
+            justify-content: flex-start;
+        }
+        .pcard--comparison .pcard__description {
+            max-width: 520px;
+        }
+        .pcard__comparison {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+        .pcard__option {
+            position: relative;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 26px 24px 24px;
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            --btn-text: #ffffff;
+        }
+        .pcard__option::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            border-radius: 20px 20px 0 0;
+            background: var(--accent, #2563eb);
+        }
+        .pcard__option-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .pcard__option-name {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .pcard__option-tag {
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--accent, #2563eb);
+            background: rgba(148, 163, 184, 0.18);
+            white-space: nowrap;
+        }
+        .pcard__option-highlight {
+            font-size: 0.95rem;
+            color: rgba(15, 23, 42, 0.75);
+            line-height: 1.6;
+        }
+        .pcard__option-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .pcard--comparison .pcard__button {
+            width: 100%;
+            padding: 12px 0;
+        }
+        .pcard__option-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .pcard__feature-chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.06);
+            color: rgba(15, 23, 42, 0.7);
+            font-weight: 600;
+            font-size: 0.8rem;
         }
         .tile-actions {
             display: flex;
@@ -181,6 +272,11 @@
         .tile-actions button:hover {
             transform: translateY(-1px);
             box-shadow: 0 14px 35px -20px rgba(15, 23, 42, 0.6);
+        }
+        @media (max-width: 900px) {
+            .pcard__comparison {
+                grid-template-columns: 1fr;
+            }
         }
         @media (max-width: 768px) {
             header {
@@ -255,24 +351,51 @@
                     <button type="button">进入定制</button>
                 </div>
             </article>
-            <article class="template-tile" data-template="magazine-banner">
+            <article class="template-tile" data-template="comparison-duo">
                 <div class="tile-headline">
-                    <span class="tile-name">Magazine Banner Story</span>
-                    <span class="tile-tag">杂志风</span>
+                    <span class="tile-name">Dual Comparison Spotlight</span>
+                    <span class="tile-tag">双列对比</span>
                 </div>
-                <p class="tile-desc">大图叠加文字遮罩，突出氛围与故事感，适合生活方式类推荐。</p>
+                <p class="tile-desc">并排展示两款产品的卖点、价格与按钮，引导读者快速选择。</p>
                 <div class="tile-preview">
-                    <div class="pcard">
-                        <div class="pcard__media">
-                            <img src="https://images.unsplash.com/photo-1512499471-5131f4a7b446?auto=format&fit=crop&w=900&q=80" alt="咖啡机">
-                        </div>
+                    <div class="pcard pcard--comparison">
                         <div class="pcard__content">
-                            <span class="pcard__eyebrow">晨间灵感</span>
-                            <div class="pcard__title">BrewSense 手冲咖啡套装</div>
-                            <div class="pcard__description">微控温注水，解锁黄金萃取曲线，打造居家精品咖啡角。</div>
-                            <div class="pcard__footer">
-                                <span class="pcard__price">¥899</span>
-                                <div class="pcard__button">立即体验</div>
+                            <span class="pcard__eyebrow">对比推荐</span>
+                            <div class="pcard__title">两款旗舰吹风机怎么选？</div>
+                            <div class="pcard__description">针对不同发质的核心优势一目了然，快速锁定更适合你的那一款。</div>
+                            <div class="pcard__comparison">
+                                <div class="pcard__option" style="--accent:#2563eb;--btn:#2563eb;--btn-hover:#1d4ed8;">
+                                    <div class="pcard__option-header">
+                                        <span class="pcard__option-name">Sonic Air S9</span>
+                                        <span class="pcard__option-tag">强劲风压</span>
+                                    </div>
+                                    <div class="pcard__option-highlight">磁吸配件随心切换，智能温控守护发丝水分。</div>
+                                    <div class="pcard__option-meta">
+                                        <span class="pcard__price">¥1,299</span>
+                                        <div class="pcard__button">查看款式</div>
+                                    </div>
+                                    <div class="pcard__option-features">
+                                        <span class="pcard__feature-chip">磁吸造型全套</span>
+                                        <span class="pcard__feature-chip">57°C 恒温护发</span>
+                                        <span class="pcard__feature-chip">一年换新</span>
+                                    </div>
+                                </div>
+                                <div class="pcard__option" style="--accent:#f97316;--btn:#f97316;--btn-hover:#ea580c;">
+                                    <div class="pcard__option-header">
+                                        <span class="pcard__option-name">Feather Lite Q5</span>
+                                        <span class="pcard__option-tag">轻盈静音</span>
+                                    </div>
+                                    <div class="pcard__option-highlight">碳纤维机身更轻盈，长时间造型也不累手。</div>
+                                    <div class="pcard__option-meta">
+                                        <span class="pcard__price">¥1,199</span>
+                                        <div class="pcard__button">查看优惠</div>
+                                    </div>
+                                    <div class="pcard__option-features">
+                                        <span class="pcard__feature-chip">轻至 380g</span>
+                                        <span class="pcard__feature-chip">44dB 低噪</span>
+                                        <span class="pcard__feature-chip">两年质保</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

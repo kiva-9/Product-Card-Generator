@@ -408,88 +408,165 @@
                 return { html, css };
             }
         },
-        'magazine-banner': {
-            name: 'Magazine Banner Story',
-            description: '大图背景搭配半透明遮罩与按钮，增强生活方式类推荐的氛围感。',
+        'comparison-duo': {
+            name: 'Dual Comparison Spotlight',
+            description: '并排呈现两款产品的亮点、价格与行动按钮，适合“怎么选”类内容。',
             fields: [
-                { id: 'headline', label: '标题', defaultValue: 'BrewSense 手冲咖啡套装' },
-                { id: 'kicker', label: '上方引导文字', defaultValue: '晨间灵感' },
-                { id: 'description', label: '简介', type: 'textarea', defaultValue: '精准控温与手冲工具组合，让家庭咖啡角也能拥有精品店水准。' },
-                { id: 'price', label: '价格标签', defaultValue: '¥899' },
-                { id: 'buttonText', label: '按钮文案', defaultValue: '立即体验' },
-                { id: 'buttonUrl', label: '按钮链接', type: 'url', defaultValue: '#' },
-                { id: 'buttonColor', label: '按钮颜色', type: 'color', defaultValue: '#ea580c' },
-                { id: 'buttonHoverColor', label: '按钮 Hover 颜色', type: 'color', defaultValue: '#c2410c' },
-                { id: 'imageUrl', label: '背景图 URL', type: 'url', defaultValue: 'https://images.unsplash.com/photo-1512499471-5131f4a7b446?auto=format&fit=crop&w=1200&q=80' },
-                { id: 'imageAlt', label: '背景图描述（Alt）', defaultValue: '咖啡设备与咖啡杯' },
-                { id: 'overlayColor', label: '遮罩颜色', type: 'color', defaultValue: '#0f172a' },
-                { id: 'overlayOpacity', label: '遮罩透明度（0-0.9）', defaultValue: '0.45' },
-                { id: 'textColor', label: '文字颜色', type: 'color', defaultValue: '#ffffff' }
+                { id: 'headline', label: '主标题', defaultValue: '旗舰吹风机双机对比' },
+                { id: 'kicker', label: '上方标签', defaultValue: '对比推荐' },
+                { id: 'subhead', label: '副标题', type: 'textarea', defaultValue: '同价位两款热卖吹风机，从风压、重量到售后服务，帮你快速判断哪款更适合。' },
+                { id: 'leftName', label: '左侧产品名称', defaultValue: 'Sonic Air S9' },
+                { id: 'leftTagline', label: '左侧强调文案', defaultValue: '强劲风压 · 护发恒温' },
+                { id: 'leftSummary', label: '左侧简介', type: 'textarea', defaultValue: '磁吸造型配件一秒切换，智能温控守护发丝水分。' },
+                { id: 'leftPrice', label: '左侧价格/评分', defaultValue: '¥1,299' },
+                { id: 'leftFeatures', label: '左侧特色要点（每行一个）', type: 'textarea', defaultValue: '磁吸配件全套\n57°C 恒温护发\n一年换新' },
+                { id: 'leftButtonText', label: '左侧按钮文案', defaultValue: '查看款式' },
+                { id: 'leftButtonUrl', label: '左侧按钮链接', type: 'url', defaultValue: '#' },
+                { id: 'leftAccentColor', label: '左侧强调色', type: 'color', defaultValue: '#2563eb' },
+                { id: 'leftButtonColor', label: '左侧按钮颜色', type: 'color', defaultValue: '#2563eb' },
+                { id: 'leftButtonHoverColor', label: '左侧按钮 Hover 颜色', type: 'color', defaultValue: '#1d4ed8' },
+                { id: 'rightName', label: '右侧产品名称', defaultValue: 'Feather Lite Q5' },
+                { id: 'rightTagline', label: '右侧强调文案', defaultValue: '轻盈静音 · 久吹不累' },
+                { id: 'rightSummary', label: '右侧简介', type: 'textarea', defaultValue: '碳纤维轻量机身，仅 380g，长时间造型也很轻松。' },
+                { id: 'rightPrice', label: '右侧价格/评分', defaultValue: '¥1,199' },
+                { id: 'rightFeatures', label: '右侧特色要点（每行一个）', type: 'textarea', defaultValue: '轻至 380g\n44dB 低噪运行\n两年质保' },
+                { id: 'rightButtonText', label: '右侧按钮文案', defaultValue: '查看优惠' },
+                { id: 'rightButtonUrl', label: '右侧按钮链接', type: 'url', defaultValue: '#' },
+                { id: 'rightAccentColor', label: '右侧强调色', type: 'color', defaultValue: '#f97316' },
+                { id: 'rightButtonColor', label: '右侧按钮颜色', type: 'color', defaultValue: '#f97316' },
+                { id: 'rightButtonHoverColor', label: '右侧按钮 Hover 颜色', type: 'color', defaultValue: '#ea580c' }
             ],
             render(values) {
-                const overlayOpacity = clampOpacity(values.overlayOpacity);
-                const sanitizedUrl = escapeAttribute(values.buttonUrl);
+                const leftFeatures = renderFeatureChips(splitLines(values.leftFeatures));
+                const rightFeatures = renderFeatureChips(splitLines(values.rightFeatures));
+                const leftTagline = values.leftTagline ? `\n          <span class="pcard__option-tag">${escapeHtml(values.leftTagline)}</span>` : '';
+                const rightTagline = values.rightTagline ? `\n          <span class="pcard__option-tag">${escapeHtml(values.rightTagline)}</span>` : '';
+                const leftUrl = escapeAttribute(values.leftButtonUrl);
+                const rightUrl = escapeAttribute(values.rightButtonUrl);
                 const html = `
-<div class="pcard pcard--magazine" style="--btn:${values.buttonColor};--btn-hover:${values.buttonHoverColor};--overlay:${hexToRgba(values.overlayColor, overlayOpacity)};--text:${values.textColor};">
-  <div class="pcard__media">
-    <img src="${escapeAttribute(values.imageUrl)}" alt="${escapeAttribute(values.imageAlt)}">
-  </div>
+<div class="pcard pcard--comparison">
   <div class="pcard__content">
     <span class="pcard__eyebrow">${escapeHtml(values.kicker)}</span>
     <div class="pcard__title">${escapeHtml(values.headline)}</div>
-    <div class="pcard__description">${formatParagraph(values.description)}</div>
-    <div class="pcard__meta">
-      <span class="pcard__badge">${escapeHtml(values.price)}</span>
-    </div>
-    <div class="pcard__footer">
-      <div class="pcard__button" role="link" tabindex="0" data-href="${sanitizedUrl}" onclick="if(this.dataset.href){window.open(this.dataset.href, '_blank');}" onkeydown="if((event.key==='Enter'||event.key===' ') && this.dataset.href){event.preventDefault();window.open(this.dataset.href,'_blank');}">${escapeHtml(values.buttonText)}</div>
+    <div class="pcard__description">${formatParagraph(values.subhead)}</div>
+    <div class="pcard__comparison">
+      <div class="pcard__option" style="--accent:${values.leftAccentColor};--btn:${values.leftButtonColor};--btn-hover:${values.leftButtonHoverColor};">
+        <div class="pcard__option-header">
+          <span class="pcard__option-name">${escapeHtml(values.leftName)}</span>${leftTagline}
+        </div>
+        <div class="pcard__option-highlight">${formatParagraph(values.leftSummary)}</div>
+        <div class="pcard__option-meta">
+          <span class="pcard__price">${escapeHtml(values.leftPrice)}</span>
+          <div class="pcard__button" role="link" tabindex="0" data-href="${leftUrl}" onclick="if(this.dataset.href){window.open(this.dataset.href, '_blank');}" onkeydown="if((event.key==='Enter'||event.key===' ') && this.dataset.href){event.preventDefault();window.open(this.dataset.href,'_blank');}">${escapeHtml(values.leftButtonText)}</div>
+        </div>${leftFeatures}
+      </div>
+      <div class="pcard__option" style="--accent:${values.rightAccentColor};--btn:${values.rightButtonColor};--btn-hover:${values.rightButtonHoverColor};">
+        <div class="pcard__option-header">
+          <span class="pcard__option-name">${escapeHtml(values.rightName)}</span>${rightTagline}
+        </div>
+        <div class="pcard__option-highlight">${formatParagraph(values.rightSummary)}</div>
+        <div class="pcard__option-meta">
+          <span class="pcard__price">${escapeHtml(values.rightPrice)}</span>
+          <div class="pcard__button" role="link" tabindex="0" data-href="${rightUrl}" onclick="if(this.dataset.href){window.open(this.dataset.href, '_blank');}" onkeydown="if((event.key==='Enter'||event.key===' ') && this.dataset.href){event.preventDefault();window.open(this.dataset.href,'_blank');}">${escapeHtml(values.rightButtonText)}</div>
+        </div>${rightFeatures}
+      </div>
     </div>
   </div>
 </div>`;
                 const css = baseCss + `
-.pcard--magazine {
-  position: relative;
-  grid-template-columns: minmax(260px, 1fr) 1fr;
-  color: var(--text);
+.pcard--comparison {
+  grid-template-columns: 1fr;
+  padding: clamp(28px, 5vw, 36px) clamp(30px, 5.5vw, 42px);
+  background: linear-gradient(150deg, rgba(15, 23, 42, 0.04), rgba(15, 23, 42, 0.08));
+  gap: 28px;
 }
-.pcard--magazine .pcard__media {
-  position: relative;
+.pcard--comparison .pcard__content {
+  padding: 0;
+  gap: 22px;
+  justify-content: flex-start;
 }
-.pcard--magazine .pcard__media::after {
+.pcard--comparison .pcard__description {
+  max-width: 560px;
+}
+.pcard__comparison {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+.pcard__option {
+  position: relative;
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 30px 26px 26px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  --btn-text: #ffffff;
+}
+.pcard__option::before {
   content: '';
   position: absolute;
-  inset: 0;
-  background: var(--overlay);
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  border-radius: 22px 22px 0 0;
+  background: var(--accent, #2563eb);
 }
-.pcard--magazine img {
-  height: 100%;
-  width: 100%;
-  object-fit: cover;
+.pcard__option-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
 }
-.pcard--magazine .pcard__content {
-  background: rgba(255, 255, 255, 0.02);
-  backdrop-filter: blur(14px);
-  color: inherit;
+.pcard__option-name {
+  font-size: 1.06rem;
+  font-weight: 700;
+  color: #0f172a;
 }
-.pcard--magazine .pcard__eyebrow {
-  color: rgba(255, 255, 255, 0.72);
-}
-.pcard--magazine .pcard__title {
-  font-size: clamp(1.6rem, 4vw, 2.1rem);
-  color: inherit;
-}
-.pcard--magazine .pcard__description {
-  color: rgba(255, 255, 255, 0.78);
-}
-.pcard--magazine .pcard__badge {
-  background: rgba(255, 255, 255, 0.12);
-  color: inherit;
-  border-radius: 999px;
+.pcard__option-tag {
   padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
   font-weight: 600;
+  color: var(--accent, #2563eb);
+  background: rgba(148, 163, 184, 0.18);
+  white-space: nowrap;
 }
-@media (max-width: 720px) {
-  .pcard--magazine {
+.pcard__option-highlight {
+  font-size: 0.96rem;
+  color: rgba(15, 23, 42, 0.78);
+  line-height: 1.65;
+}
+.pcard__option-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+.pcard--comparison .pcard__button {
+  width: 100%;
+  padding: 14px 0;
+}
+.pcard__option-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.pcard__feature-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.06);
+  color: rgba(15, 23, 42, 0.7);
+  font-weight: 600;
+  font-size: 0.82rem;
+}
+@media (max-width: 760px) {
+  .pcard__comparison {
     grid-template-columns: 1fr;
   }
 }
@@ -736,6 +813,12 @@
       </div>`;
     }
 
+    function renderFeatureChips(items) {
+        if (!items.length) return '';
+        const chips = items.map(item => `          <span class="pcard__feature-chip">${escapeHtml(item)}</span>`).join('\n');
+        return `\n        <div class="pcard__option-features">\n${chips}\n        </div>`;
+    }
+
     function splitLines(text) {
         return (text || '').split(/\r?\n/).map(line => line.trim()).filter(Boolean);
     }
@@ -760,26 +843,6 @@
         return Object.keys(templates)[0];
     }
 
-    function hexToRgba(hex, alpha = 1) {
-        let sanitized = hex.replace('#', '');
-        if (sanitized.length === 3) {
-            sanitized = sanitized.split('').map(ch => ch + ch).join('');
-        }
-        const bigint = parseInt(sanitized, 16);
-        if (Number.isNaN(bigint)) {
-            return `rgba(15, 23, 42, ${alpha})`;
-        }
-        const r = (bigint >> 16) & 255;
-        const g = (bigint >> 8) & 255;
-        const b = bigint & 255;
-        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-    }
-
-    function clampOpacity(value) {
-        const num = parseFloat(value);
-        if (Number.isNaN(num)) return 0.4;
-        return Math.min(0.9, Math.max(0, num));
-    }
 </script>
 </body>
 </html>
