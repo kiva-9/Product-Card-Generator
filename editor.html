@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>产品卡片定制器</title>
+    <style>
+        :root {
+            color-scheme: light;
+        }
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            background: #0b1120;
+            font-family: "SF Pro Display", "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            color: #0f172a;
+        }
+        header {
+            padding: 28px 32px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 24px;
+        }
+        header h1 {
+            color: #f8fafc;
+            margin: 0;
+            font-size: clamp(2rem, 3.5vw, 2.6rem);
+            letter-spacing: -0.04em;
+        }
+        header a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        main {
+            display: grid;
+            grid-template-columns: minmax(320px, 380px) 1fr;
+            gap: 24px;
+            padding: 32px;
+            align-items: flex-start;
+        }
+        .panel {
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 40px 120px -80px rgba(15, 23, 42, 0.8);
+        }
+        .panel h2 {
+            margin-top: 0;
+        }
+        .panel--form {
+            padding: 28px;
+            position: sticky;
+            top: 32px;
+        }
+        .panel--preview {
+            padding: 32px;
+        }
+        .template-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 24px;
+        }
+        .template-meta span {
+            color: #475569;
+            font-size: 0.95rem;
+        }
+        label {
+            font-weight: 600;
+            color: #1e293b;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        input[type="text"],
+        input[type="url"],
+        input[type="color"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(148, 163, 184, 0.5);
+            font-size: 0.96rem;
+            font-family: inherit;
+            transition: border 0.2s ease, box-shadow 0.2s ease;
+            background: #fff;
+            color: #0f172a;
+        }
+        input[type="color"] {
+            padding: 6px 8px;
+            height: 44px;
+        }
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        select {
+            height: 48px;
+            cursor: pointer;
+        }
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.18);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 28px;
+        }
+        button {
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .btn-primary {
+            padding: 12px 18px;
+            border-radius: 999px;
+            border: none;
+            background: #2563eb;
+            color: #fff;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 32px -16px rgba(37, 99, 235, 0.6);
+        }
+        .preview-wrapper {
+            background: radial-gradient(circle at top, rgba(255,255,255,0.1), transparent 55%), #0b1120;
+            border-radius: 24px;
+            padding: 40px;
+            min-height: 100%;
+        }
+        #previewArea {
+            display: flex;
+            justify-content: center;
+        }
+        .code-output {
+            margin-top: 36px;
+        }
+        .code-output h3 {
+            margin-bottom: 12px;
+            color: #1e293b;
+        }
+        textarea#outputCode {
+            width: 100%;
+            min-height: 280px;
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.5);
+            padding: 16px;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 0.92rem;
+            line-height: 1.6;
+            resize: vertical;
+        }
+        .copy-btn {
+            margin-top: 12px;
+            padding: 10px 18px;
+            border-radius: 12px;
+            border: none;
+            background: #059669;
+            color: #fff;
+            font-weight: 600;
+        }
+        .copy-btn:hover {
+            background: #047857;
+        }
+        @media (max-width: 960px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+            .panel--form {
+                position: static;
+            }
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>产品卡片定制器</h1>
+    <a href="index.html">← 返回样式库</a>
+</header>
+<main>
+    <section class="panel panel--form">
+        <div class="form-group">
+            <label for="templateSelect">选择模板</label>
+            <select id="templateSelect"></select>
+        </div>
+        <div class="template-meta">
+            <strong id="templateName">模板名称</strong>
+            <span id="templateDescription">模板描述</span>
+        </div>
+        <form id="dynamicForm"></form>
+        <div class="form-actions">
+            <button type="button" class="btn-primary" id="resetBtn">恢复默认</button>
+        </div>
+    </section>
+    <section class="panel panel--preview">
+        <div class="preview-wrapper">
+            <div id="previewArea"></div>
+        </div>
+        <div class="code-output">
+            <h3>HTML / CSS 代码</h3>
+            <textarea id="outputCode" readonly></textarea>
+            <button type="button" class="copy-btn" id="copyBtn">复制代码</button>
+        </div>
+    </section>
+</main>
+<script>
+    const templates = {
+        'sleek-feature': {
+            name: 'Sleek Feature Showcase',
+            description: '左图右文的横向布局，展示卖点列表与价格，适合评测文章中的重点推荐。',
+            fields: [
+                { id: 'productName', label: '产品名称', defaultValue: 'Sonic X Pro 吹风机' },
+                { id: 'tagline', label: '亮点标语', defaultValue: '速干旗舰 · 智能温控' },
+                { id: 'description', label: '产品描述', type: 'textarea', defaultValue: '3 分钟快速干发，智能温控呵护发丝，附带磁吸造型配件。' },
+                { id: 'features', label: '卖点列表（每行一个）', type: 'textarea', defaultValue: '超音速大风量\n4 组温控模式\n磁吸顺发嘴附件' },
+                { id: 'price', label: '价格信息', defaultValue: '¥1,299 起' },
+                { id: 'buttonText', label: '按钮文案', defaultValue: '查看详细评测' },
+                { id: 'buttonUrl', label: '按钮链接', type: 'url', defaultValue: '#' },
+                { id: 'buttonColor', label: '按钮颜色', type: 'color', defaultValue: '#97000f' },
+                { id: 'buttonHoverColor', label: '按钮 Hover 颜色', type: 'color', defaultValue: '#e30016' },
+                { id: 'imageUrl', label: '主图 URL', type: 'url', defaultValue: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=900&q=80' },
+                { id: 'imageAlt', label: '主图描述（Alt）', defaultValue: '吹风机产品图' },
+                { id: 'accentColor', label: '强调色', type: 'color', defaultValue: '#1d4ed8' }
+            ],
+            render(values) {
+                const featureItems = splitLines(values.features).map(item => `<li>${escapeHtml(item)}</li>`).join('');
+                const html = `
+<article class="pcard pcard--sleek" style="--accent:${values.accentColor};--btn:${values.buttonColor};--btn-hover:${values.buttonHoverColor};">
+  <div class="pcard__media">
+    <img src="${escapeAttribute(values.imageUrl)}" alt="${escapeAttribute(values.imageAlt)}">
+  </div>
+  <div class="pcard__content">
+    <div class="pcard__eyebrow">${escapeHtml(values.tagline)}</div>
+    <h2 class="pcard__title">${escapeHtml(values.productName)}</h2>
+    <p class="pcard__description">${formatParagraph(values.description)}</p>
+    <ul class="pcard__featurelist">${featureItems}</ul>
+    <div class="pcard__footer">
+      <span class="pcard__price">${escapeHtml(values.price)}</span>
+      <a class="pcard__button" href="${escapeAttribute(values.buttonUrl)}">${escapeHtml(values.buttonText)}</a>
+    </div>
+  </div>
+</article>`;
+                const css = baseCss + `
+.pcard--sleek {
+  grid-template-columns: minmax(240px, 0.95fr) 1.05fr;
+}
+.pcard--sleek .pcard__media {
+  min-height: 240px;
+}
+.pcard--sleek .pcard__eyebrow {
+  color: var(--accent);
+}
+.pcard--sleek .pcard__content {
+  gap: 20px;
+}
+.pcard__featurelist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+  font-size: 0.95rem;
+  color: #475569;
+}
+.pcard__featurelist li {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+.pcard__featurelist li::before {
+  content: '•';
+  color: var(--accent);
+  font-weight: 700;
+  margin-right: 8px;
+}
+`;
+                return { html, css };
+            }
+        },
+        'metric-focus': {
+            name: 'Metric Focus Showcase',
+            description: '突出产品评分、参数与服务信息，适合电商导购或榜单对比场景。',
+            fields: [
+                { id: 'productName', label: '产品名称', defaultValue: 'AeroClean Max 扫地机器人' },
+                { id: 'subtitle', label: '副标题', defaultValue: '旗舰级全局导航清洁系统' },
+                { id: 'summary', label: '一句话摘要', type: 'textarea', defaultValue: '3200Pa 超强吸力结合 Lidar 导航，自动集尘底座 45 天免维护。' },
+                { id: 'metricOneLabel', label: '指标 1 标题', defaultValue: '续航' },
+                { id: 'metricOneValue', label: '指标 1 数值', defaultValue: '220 min' },
+                { id: 'metricTwoLabel', label: '指标 2 标题', defaultValue: '尘盒' },
+                { id: 'metricTwoValue', label: '指标 2 数值', defaultValue: '自动集尘' },
+                { id: 'metricThreeLabel', label: '指标 3 标题', defaultValue: '噪音' },
+                { id: 'metricThreeValue', label: '指标 3 数值', defaultValue: '55 dB' },
+                { id: 'ratingValue', label: '评分', defaultValue: '4.8' },
+                { id: 'ratingCount', label: '评价数量', defaultValue: '2,315 条评价' },
+                { id: 'shippingNote', label: '配送提示', defaultValue: '次日达 · 30 天无忧退换' },
+                { id: 'buttonText', label: '按钮文案', defaultValue: '查看测评' },
+                { id: 'buttonUrl', label: '按钮链接', type: 'url', defaultValue: '#' },
+                { id: 'buttonColor', label: '按钮颜色', type: 'color', defaultValue: '#0f172a' },
+                { id: 'buttonHoverColor', label: '按钮 Hover 颜色', type: 'color', defaultValue: '#1e293b' },
+                { id: 'imageUrl', label: '主图 URL', type: 'url', defaultValue: 'https://images.unsplash.com/photo-1582719478173-2cf4e1e71405?auto=format&fit=crop&w=900&q=80' },
+                { id: 'imageAlt', label: '主图描述（Alt）', defaultValue: '扫地机器人运行中' },
+                { id: 'accentColor', label: '强调色', type: 'color', defaultValue: '#2563eb' },
+                { id: 'badgeColor', label: '徽章背景色', type: 'color', defaultValue: '#dbeafe' }
+            ],
+            render(values) {
+                const html = `
+<article class="pcard pcard--metrics" style="--accent:${values.accentColor};--btn:${values.buttonColor};--btn-hover:${values.buttonHoverColor};--badge:${values.badgeColor};">
+  <div class="pcard__media">
+    <img src="${escapeAttribute(values.imageUrl)}" alt="${escapeAttribute(values.imageAlt)}">
+  </div>
+  <div class="pcard__content">
+    <div class="pcard__eyebrow">${escapeHtml(values.subtitle)}</div>
+    <h2 class="pcard__title">${escapeHtml(values.productName)}</h2>
+    <p class="pcard__description">${formatParagraph(values.summary)}</p>
+    <div class="pcard__metrics">
+      ${renderMetric(values.metricOneLabel, values.metricOneValue)}
+      ${renderMetric(values.metricTwoLabel, values.metricTwoValue)}
+      ${renderMetric(values.metricThreeLabel, values.metricThreeValue)}
+    </div>
+    <div class="pcard__meta">
+      <span class="pcard__badge">⭐ ${escapeHtml(values.ratingValue)} · ${escapeHtml(values.ratingCount)}</span>
+      <span class="pcard__note">${escapeHtml(values.shippingNote)}</span>
+    </div>
+    <div class="pcard__footer">
+      <a class="pcard__button" href="${escapeAttribute(values.buttonUrl)}">${escapeHtml(values.buttonText)}</a>
+    </div>
+  </div>
+</article>`;
+                const css = baseCss + `
+.pcard--metrics {
+  grid-template-columns: minmax(220px, 0.9fr) 1.1fr;
+}
+.pcard--metrics .pcard__content {
+  gap: 16px;
+}
+.pcard__metrics {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding: 0;
+}
+.pcard__metric {
+  background: rgba(148, 163, 184, 0.14);
+  border-radius: 18px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.pcard__metric-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(15, 23, 42, 0.65);
+}
+.pcard__metric-value {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: rgba(15, 23, 42, 0.9);
+}
+.pcard__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.pcard__badge {
+  background: var(--badge);
+  color: var(--accent);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.pcard__note {
+  font-size: 0.9rem;
+  color: rgba(15, 23, 42, 0.65);
+}
+@media (max-width: 640px) {
+  .pcard__metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+`;
+                return { html, css };
+            }
+        },
+        'magazine-banner': {
+            name: 'Magazine Banner Story',
+            description: '大图背景搭配半透明遮罩与按钮，增强生活方式类推荐的氛围感。',
+            fields: [
+                { id: 'headline', label: '标题', defaultValue: 'BrewSense 手冲咖啡套装' },
+                { id: 'kicker', label: '上方引导文字', defaultValue: '晨间灵感' },
+                { id: 'description', label: '简介', type: 'textarea', defaultValue: '精准控温与手冲工具组合，让家庭咖啡角也能拥有精品店水准。' },
+                { id: 'price', label: '价格标签', defaultValue: '¥899' },
+                { id: 'buttonText', label: '按钮文案', defaultValue: '立即体验' },
+                { id: 'buttonUrl', label: '按钮链接', type: 'url', defaultValue: '#' },
+                { id: 'buttonColor', label: '按钮颜色', type: 'color', defaultValue: '#ea580c' },
+                { id: 'buttonHoverColor', label: '按钮 Hover 颜色', type: 'color', defaultValue: '#c2410c' },
+                { id: 'imageUrl', label: '背景图 URL', type: 'url', defaultValue: 'https://images.unsplash.com/photo-1512499471-5131f4a7b446?auto=format&fit=crop&w=1200&q=80' },
+                { id: 'imageAlt', label: '背景图描述（Alt）', defaultValue: '咖啡设备与咖啡杯' },
+                { id: 'overlayColor', label: '遮罩颜色', type: 'color', defaultValue: '#0f172a' },
+                { id: 'overlayOpacity', label: '遮罩透明度（0-0.9）', defaultValue: '0.45' },
+                { id: 'textColor', label: '文字颜色', type: 'color', defaultValue: '#ffffff' }
+            ],
+            render(values) {
+                const overlayOpacity = clampOpacity(values.overlayOpacity);
+                const html = `
+<article class="pcard pcard--magazine" style="--btn:${values.buttonColor};--btn-hover:${values.buttonHoverColor};--overlay:${hexToRgba(values.overlayColor, overlayOpacity)};--text:${values.textColor};">
+  <div class="pcard__media">
+    <img src="${escapeAttribute(values.imageUrl)}" alt="${escapeAttribute(values.imageAlt)}">
+  </div>
+  <div class="pcard__content">
+    <span class="pcard__eyebrow">${escapeHtml(values.kicker)}</span>
+    <h2 class="pcard__title">${escapeHtml(values.headline)}</h2>
+    <p class="pcard__description">${formatParagraph(values.description)}</p>
+    <div class="pcard__meta">
+      <span class="pcard__badge">${escapeHtml(values.price)}</span>
+    </div>
+    <div class="pcard__footer">
+      <a class="pcard__button" href="${escapeAttribute(values.buttonUrl)}">${escapeHtml(values.buttonText)}</a>
+    </div>
+  </div>
+</article>`;
+                const css = baseCss + `
+.pcard--magazine {
+  position: relative;
+  grid-template-columns: minmax(260px, 1fr) 1fr;
+  color: var(--text);
+}
+.pcard--magazine .pcard__media {
+  position: relative;
+}
+.pcard--magazine .pcard__media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--overlay);
+}
+.pcard--magazine img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+.pcard--magazine .pcard__content {
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(14px);
+  color: inherit;
+}
+.pcard--magazine .pcard__eyebrow {
+  color: rgba(255, 255, 255, 0.72);
+}
+.pcard--magazine .pcard__title {
+  font-size: clamp(1.6rem, 4vw, 2.1rem);
+  color: inherit;
+}
+.pcard--magazine .pcard__description {
+  color: rgba(255, 255, 255, 0.78);
+}
+.pcard--magazine .pcard__badge {
+  background: rgba(255, 255, 255, 0.12);
+  color: inherit;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-weight: 600;
+}
+@media (max-width: 720px) {
+  .pcard--magazine {
+    grid-template-columns: 1fr;
+  }
+}
+`;
+                return { html, css };
+            }
+        }
+    };
+
+    const baseCss = `
+.pcard {
+  --btn: #111827;
+  --btn-hover: #111827;
+  --btn-text: #ffffff;
+  background: #ffffff;
+  border-radius: 24px;
+  overflow: hidden;
+  display: grid;
+  box-shadow: 0 30px 70px -40px rgba(15, 23, 42, 0.55);
+  max-width: 880px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  column-gap: 0;
+}
+.pcard__media {
+  position: relative;
+  overflow: hidden;
+}
+.pcard__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.pcard__content {
+  padding: clamp(24px, 4vw, 36px);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.pcard__eyebrow {
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: rgba(15, 23, 42, 0.72);
+}
+.pcard__title {
+  margin: 0;
+  font-size: clamp(1.5rem, 3vw, 1.9rem);
+  font-weight: 800;
+  color: #0f172a;
+}
+.pcard__description {
+  margin: 0;
+  color: rgba(15, 23, 42, 0.7);
+  line-height: 1.7;
+  font-size: 0.98rem;
+}
+.pcard__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.pcard__badge {
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-radius: 12px;
+  padding: 6px 12px;
+  background: rgba(148, 163, 184, 0.15);
+  color: rgba(15, 23, 42, 0.8);
+}
+.pcard__note {
+  font-size: 0.9rem;
+  color: rgba(15, 23, 42, 0.65);
+}
+.pcard__footer {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.pcard__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 24px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  color: var(--btn-text);
+  background: var(--btn);
+  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 14px 32px -20px rgba(37, 99, 235, 0.45);
+}
+.pcard__button:hover {
+  transform: translateY(-1px);
+  background: var(--btn-hover);
+}
+@media (max-width: 720px) {
+  .pcard {
+    grid-template-columns: 1fr;
+  }
+  .pcard__media {
+    min-height: 220px;
+  }
+}
+`;
+
+    const formElement = document.getElementById('dynamicForm');
+    const templateSelect = document.getElementById('templateSelect');
+    const templateName = document.getElementById('templateName');
+    const templateDescription = document.getElementById('templateDescription');
+    const previewArea = document.getElementById('previewArea');
+    const outputCode = document.getElementById('outputCode');
+    const copyBtn = document.getElementById('copyBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    let currentTemplateId = getInitialTemplate();
+    let fieldElements = new Map();
+
+    populateTemplateSelect();
+    updateTemplate(currentTemplateId);
+
+    templateSelect.addEventListener('change', () => {
+        updateTemplate(templateSelect.value);
+    });
+
+    resetBtn.addEventListener('click', () => {
+        const template = templates[currentTemplateId];
+        if (!template) return;
+        template.fields.forEach(field => {
+            const el = fieldElements.get(field.id);
+            if (!el) return;
+            el.value = field.defaultValue ?? '';
+        });
+        renderPreview();
+    });
+
+    copyBtn.addEventListener('click', async () => {
+        try {
+            await navigator.clipboard.writeText(outputCode.value);
+            copyBtn.textContent = '已复制!';
+            setTimeout(() => copyBtn.textContent = '复制代码', 1800);
+        } catch (err) {
+            outputCode.select();
+            document.execCommand('copy');
+            copyBtn.textContent = '已复制!';
+            setTimeout(() => copyBtn.textContent = '复制代码', 1800);
+        }
+    });
+
+    function populateTemplateSelect() {
+        Object.entries(templates).forEach(([id, tpl]) => {
+            const option = document.createElement('option');
+            option.value = id;
+            option.textContent = tpl.name;
+            templateSelect.appendChild(option);
+        });
+    }
+
+    function updateTemplate(id) {
+        if (!templates[id]) {
+            id = Object.keys(templates)[0];
+        }
+        currentTemplateId = id;
+        templateSelect.value = id;
+        const template = templates[id];
+        templateName.textContent = template.name;
+        templateDescription.textContent = template.description;
+        buildDynamicForm(template);
+        renderPreview();
+        const searchParams = new URLSearchParams(window.location.search);
+        searchParams.set('template', id);
+        const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
+        window.history.replaceState({}, '', newUrl);
+    }
+
+    function buildDynamicForm(template) {
+        formElement.innerHTML = '';
+        fieldElements = new Map();
+        template.fields.forEach(field => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'form-group';
+
+            const label = document.createElement('label');
+            label.htmlFor = field.id;
+            label.textContent = field.label;
+            wrapper.appendChild(label);
+
+            let input;
+            if (field.type === 'textarea') {
+                input = document.createElement('textarea');
+            } else if (field.type === 'color') {
+                input = document.createElement('input');
+                input.type = 'color';
+            } else if (field.type === 'url') {
+                input = document.createElement('input');
+                input.type = 'url';
+            } else {
+                input = document.createElement('input');
+                input.type = 'text';
+            }
+            input.id = field.id;
+            input.name = field.id;
+            input.value = field.defaultValue ?? '';
+            if (field.placeholder) {
+                input.placeholder = field.placeholder;
+            }
+            input.addEventListener('input', renderPreview);
+            wrapper.appendChild(input);
+            formElement.appendChild(wrapper);
+            fieldElements.set(field.id, input);
+        });
+    }
+
+    function renderPreview() {
+        const template = templates[currentTemplateId];
+        if (!template) return;
+        const values = {};
+        template.fields.forEach(field => {
+            const el = fieldElements.get(field.id);
+            values[field.id] = el ? el.value : '';
+        });
+        const { html, css } = template.render(values);
+        previewArea.innerHTML = '';
+        const styleElement = document.createElement('style');
+        styleElement.textContent = css;
+        previewArea.appendChild(styleElement);
+        previewArea.insertAdjacentHTML('beforeend', html);
+        outputCode.value = `<style>\n${css}\n</style>\n\n${html}`;
+    }
+
+    function renderMetric(label, value) {
+        return `
+      <div class="pcard__metric">
+        <span class="pcard__metric-label">${escapeHtml(label)}</span>
+        <span class="pcard__metric-value">${escapeHtml(value)}</span>
+      </div>`;
+    }
+
+    function splitLines(text) {
+        return (text || '').split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+    }
+
+    function formatParagraph(text) {
+        return escapeHtml(text).replace(/\n/g, '<br>');
+    }
+
+    function escapeHtml(str = '') {
+        const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+        return String(str).replace(/[&<>"']/g, char => map[char]);
+    }
+
+    function escapeAttribute(str = '') {
+        return escapeHtml(str);
+    }
+
+    function getInitialTemplate() {
+        const params = new URLSearchParams(window.location.search);
+        const tpl = params.get('template');
+        if (tpl && templates[tpl]) return tpl;
+        return Object.keys(templates)[0];
+    }
+
+    function hexToRgba(hex, alpha = 1) {
+        let sanitized = hex.replace('#', '');
+        if (sanitized.length === 3) {
+            sanitized = sanitized.split('').map(ch => ch + ch).join('');
+        }
+        const bigint = parseInt(sanitized, 16);
+        if (Number.isNaN(bigint)) {
+            return `rgba(15, 23, 42, ${alpha})`;
+        }
+        const r = (bigint >> 16) & 255;
+        const g = (bigint >> 8) & 255;
+        const b = bigint & 255;
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    function clampOpacity(value) {
+        const num = parseFloat(value);
+        if (Number.isNaN(num)) return 0.4;
+        return Math.min(0.9, Math.max(0, num));
+    }
+</script>
+</body>
+</html>
