@@ -240,23 +240,28 @@
                 { id: 'accentColor', label: '强调色', type: 'color', defaultValue: '#1d4ed8' }
             ],
             render(values) {
-                const featureItems = splitLines(values.features).map(item => `<li>${escapeHtml(item)}</li>`).join('');
+                const featureItems = splitLines(values.features).map(item => `
+      <div class="pcard__featurelist-item">
+        <span class="pcard__featurelist-bullet">•</span>
+        <span class="pcard__featurelist-text">${escapeHtml(item)}</span>
+      </div>`).join('');
+                const sanitizedUrl = escapeAttribute(values.buttonUrl);
                 const html = `
-<article class="pcard pcard--sleek" style="--accent:${values.accentColor};--btn:${values.buttonColor};--btn-hover:${values.buttonHoverColor};">
+<div class="pcard pcard--sleek" style="--accent:${values.accentColor};--btn:${values.buttonColor};--btn-hover:${values.buttonHoverColor};">
   <div class="pcard__media">
     <img src="${escapeAttribute(values.imageUrl)}" alt="${escapeAttribute(values.imageAlt)}">
   </div>
   <div class="pcard__content">
     <div class="pcard__eyebrow">${escapeHtml(values.tagline)}</div>
-    <h2 class="pcard__title">${escapeHtml(values.productName)}</h2>
-    <p class="pcard__description">${formatParagraph(values.description)}</p>
-    <ul class="pcard__featurelist">${featureItems}</ul>
+    <div class="pcard__title">${escapeHtml(values.productName)}</div>
+    <div class="pcard__description">${formatParagraph(values.description)}</div>
+    <div class="pcard__featurelist">${featureItems}</div>
     <div class="pcard__footer">
       <span class="pcard__price">${escapeHtml(values.price)}</span>
-      <a class="pcard__button" href="${escapeAttribute(values.buttonUrl)}">${escapeHtml(values.buttonText)}</a>
+      <div class="pcard__button" role="link" tabindex="0" data-href="${sanitizedUrl}" onclick="if(this.dataset.href){window.open(this.dataset.href, '_blank');}" onkeydown="if((event.key==='Enter'||event.key===' ') && this.dataset.href){event.preventDefault();window.open(this.dataset.href,'_blank');}">${escapeHtml(values.buttonText)}</div>
     </div>
   </div>
-</article>`;
+</div>`;
                 const css = baseCss + `
 .pcard--sleek {
   grid-template-columns: minmax(240px, 0.95fr) 1.05fr;
@@ -271,24 +276,23 @@
   gap: 20px;
 }
 .pcard__featurelist {
-  margin: 0;
-  padding: 0;
-  list-style: none;
   display: grid;
   gap: 8px;
-  font-size: 0.95rem;
-  color: #475569;
 }
-.pcard__featurelist li {
+.pcard__featurelist-item {
   display: flex;
   align-items: flex-start;
   gap: 6px;
 }
-.pcard__featurelist li::before {
-  content: '•';
+.pcard__featurelist-bullet {
   color: var(--accent);
   font-weight: 700;
   margin-right: 8px;
+  line-height: 1;
+}
+.pcard__featurelist-text {
+  color: #475569;
+  font-size: 0.95rem;
 }
 `;
                 return { html, css };
@@ -320,15 +324,16 @@
                 { id: 'badgeColor', label: '徽章背景色', type: 'color', defaultValue: '#dbeafe' }
             ],
             render(values) {
+                const sanitizedUrl = escapeAttribute(values.buttonUrl);
                 const html = `
-<article class="pcard pcard--metrics" style="--accent:${values.accentColor};--btn:${values.buttonColor};--btn-hover:${values.buttonHoverColor};--badge:${values.badgeColor};">
+<div class="pcard pcard--metrics" style="--accent:${values.accentColor};--btn:${values.buttonColor};--btn-hover:${values.buttonHoverColor};--badge:${values.badgeColor};">
   <div class="pcard__media">
     <img src="${escapeAttribute(values.imageUrl)}" alt="${escapeAttribute(values.imageAlt)}">
   </div>
   <div class="pcard__content">
     <div class="pcard__eyebrow">${escapeHtml(values.subtitle)}</div>
-    <h2 class="pcard__title">${escapeHtml(values.productName)}</h2>
-    <p class="pcard__description">${formatParagraph(values.summary)}</p>
+    <div class="pcard__title">${escapeHtml(values.productName)}</div>
+    <div class="pcard__description">${formatParagraph(values.summary)}</div>
     <div class="pcard__metrics">
       ${renderMetric(values.metricOneLabel, values.metricOneValue)}
       ${renderMetric(values.metricTwoLabel, values.metricTwoValue)}
@@ -339,10 +344,10 @@
       <span class="pcard__note">${escapeHtml(values.shippingNote)}</span>
     </div>
     <div class="pcard__footer">
-      <a class="pcard__button" href="${escapeAttribute(values.buttonUrl)}">${escapeHtml(values.buttonText)}</a>
+      <div class="pcard__button" role="link" tabindex="0" data-href="${sanitizedUrl}" onclick="if(this.dataset.href){window.open(this.dataset.href, '_blank');}" onkeydown="if((event.key==='Enter'||event.key===' ') && this.dataset.href){event.preventDefault();window.open(this.dataset.href,'_blank');}">${escapeHtml(values.buttonText)}</div>
     </div>
   </div>
-</article>`;
+</div>`;
                 const css = baseCss + `
 .pcard--metrics {
   grid-template-columns: minmax(220px, 0.9fr) 1.1fr;
@@ -423,23 +428,24 @@
             ],
             render(values) {
                 const overlayOpacity = clampOpacity(values.overlayOpacity);
+                const sanitizedUrl = escapeAttribute(values.buttonUrl);
                 const html = `
-<article class="pcard pcard--magazine" style="--btn:${values.buttonColor};--btn-hover:${values.buttonHoverColor};--overlay:${hexToRgba(values.overlayColor, overlayOpacity)};--text:${values.textColor};">
+<div class="pcard pcard--magazine" style="--btn:${values.buttonColor};--btn-hover:${values.buttonHoverColor};--overlay:${hexToRgba(values.overlayColor, overlayOpacity)};--text:${values.textColor};">
   <div class="pcard__media">
     <img src="${escapeAttribute(values.imageUrl)}" alt="${escapeAttribute(values.imageAlt)}">
   </div>
   <div class="pcard__content">
     <span class="pcard__eyebrow">${escapeHtml(values.kicker)}</span>
-    <h2 class="pcard__title">${escapeHtml(values.headline)}</h2>
-    <p class="pcard__description">${formatParagraph(values.description)}</p>
+    <div class="pcard__title">${escapeHtml(values.headline)}</div>
+    <div class="pcard__description">${formatParagraph(values.description)}</div>
     <div class="pcard__meta">
       <span class="pcard__badge">${escapeHtml(values.price)}</span>
     </div>
     <div class="pcard__footer">
-      <a class="pcard__button" href="${escapeAttribute(values.buttonUrl)}">${escapeHtml(values.buttonText)}</a>
+      <div class="pcard__button" role="link" tabindex="0" data-href="${sanitizedUrl}" onclick="if(this.dataset.href){window.open(this.dataset.href, '_blank');}" onkeydown="if((event.key==='Enter'||event.key===' ') && this.dataset.href){event.preventDefault();window.open(this.dataset.href,'_blank');}">${escapeHtml(values.buttonText)}</div>
     </div>
   </div>
-</article>`;
+</div>`;
                 const css = baseCss + `
 .pcard--magazine {
   position: relative;
@@ -574,15 +580,19 @@
   border-radius: 999px;
   font-weight: 600;
   font-size: 1rem;
-  text-decoration: none;
   color: var(--btn-text);
   background: var(--btn);
   transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
   box-shadow: 0 14px 32px -20px rgba(37, 99, 235, 0.45);
+  cursor: pointer;
 }
 .pcard__button:hover {
   transform: translateY(-1px);
   background: var(--btn-hover);
+}
+.pcard__button:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.35);
+  outline-offset: 2px;
 }
 @media (max-width: 720px) {
   .pcard {
